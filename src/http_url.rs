@@ -174,7 +174,7 @@ impl HttpUrl {
             dst,
             "http{s}://{host}",
             s = if self.https { "s" } else { "" },
-            host = &self.host,
+            host = self.host,
         )?;
         if let Port::Explicit(port) = self.port {
             write!(dst, ":{}", port)?;
@@ -187,7 +187,7 @@ impl HttpUrl {
         write!(
             dst,
             "{path_and_query}{maybe_hash}{maybe_fragment}",
-            path_and_query = &self.path_and_query,
+            path_and_query = self.path_and_query,
             maybe_hash = if self.fragment.is_some() { "#" } else { "" },
             maybe_fragment = self.fragment.as_deref().unwrap_or(""),
         )
