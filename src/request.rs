@@ -279,23 +279,9 @@ impl Request {
     /// [`SerdeJsonError`](enum.Error.html#variant.SerdeJsonError) and
     /// [`InvalidUtf8InBody`](enum.Error.html#variant.InvalidUtf8InBody).
     pub fn send(self) -> Result<Response, Error> {
-        let parsed_request = ParsedRequest::new(self)?;
-        if parsed_request.url.https {
-            #[cfg(any(feature = "rustls", feature = "openssl", feature = "native-tls"))]
-            {
-                let is_head = parsed_request.config.method == Method::Head;
-                let response = Connection::new(parsed_request).send_https()?;
-                Response::create(response, is_head)
-            }
-            #[cfg(not(any(feature = "rustls", feature = "openssl", feature = "native-tls")))]
-            {
-                Err(Error::HttpsFeatureNotEnabled)
-            }
-        } else {
-            let is_head = parsed_request.config.method == Method::Head;
-            let response = Connection::new(parsed_request).send()?;
-            Response::create(response, is_head)
-        }
+        let is_head = self.method == Method::Head;
+        let response = self.send_lazy()?;
+        Response::create(response, is_head)
     }
 
     /// Sends this request to the host, loaded lazily.
